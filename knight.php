@@ -82,7 +82,7 @@ function findRoute($startX, $startY)
 
 
     foreach ($options as $key => $option) {
-        // skip if we already know there are no movements
+        // skip if distance is 0, as it was not an allowed move
         if ($option == 0) {
             continue;
         }
@@ -91,12 +91,10 @@ function findRoute($startX, $startY)
         $newX = $startX + $movements[$key][0];
         $newY = $startY + $movements[$key][1];
         
-        if (isValidMove($newX, $newY) && isCoordOpen([$newX, $newY])) {
-            $result = findRoute($newX, $newY);
+        $result = findRoute($newX, $newY);
 
-            if ($result) {
-                return true;
-            }
+        if ($result) {
+            return true;
         }
     }
 
@@ -122,21 +120,6 @@ function isCoordOpen($coord)
     global $board;
 
     return ! in_array($coord, $board);
-}
-
-function countOptionsAhead($x, $y)
-{
-    global $movements;
-
-    $count = 0;
-
-    foreach ($movements as $movement) {
-        if (isCoordOpen([$x + $movement[0], $y + $movement[1]])) {
-            $count++;
-        }
-    }
-
-    return $count;
 }
 
 function distanceToCenter($x, $y)
