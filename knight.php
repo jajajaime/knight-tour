@@ -66,7 +66,7 @@ function findRoute($startX, $startY)
         return true;
     }
 
-    // count the movements for each option
+    // get the distance to the center from each possible movement
     $options = [0, 0, 0, 0, 0, 0, 0, 0];
 
     foreach ($movements as $key => $movement) {
