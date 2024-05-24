@@ -21,21 +21,33 @@ $movements = [
     [1, -2],
 ];
 
+$squaresToCenter = 7/2;
+
 $startX = rand(1, 8);
 $startY = rand(1, 8);
+
+$startTime = microtime(true);
 
 // call the main program
 findRoute($startX, $startY);
 
+$endTime = microtime(true);
+
 // print the result
-echo count($board) . PHP_EOL;
-echo json_encode($board);
+echo PHP_EOL . PHP_EOL;
+echo 'Start time: ' . $startTime . PHP_EOL;
+echo 'End time: ' . $endTime . PHP_EOL;
+echo 'Total time: ' . ($endTime - $startTime);
+echo PHP_EOL . PHP_EOL;
 
 echo PHP_EOL;
 for ($i = 1; $i <= 8; $i++) {
-    foreach ($board as $key => $value) {
-        if ($value[0] == $i) {
-            echo sprintf('%02d', $key + 1) . ' ';
+    for ($j = 1; $j <= 8; $j++) {
+        if ($boardKey = array_search([$i, $j], $board) !== false) {
+            echo sprintf('%02d', array_search([$i, $j], $board) + 1) . ' ';
+        }
+        else {
+            echo '-- ';
         }
     }
 
@@ -51,7 +63,7 @@ function findRoute($startX, $startY)
     $board[] = [$startX, $startY];
 
     if (count($board) >= 64) {
-        return;
+        return true;
     }
 
     // count the movements for each option
@@ -61,7 +73,7 @@ function findRoute($startX, $startY)
         $newX = $startX + $movement[0];
         $newY = $startY + $movement[1];
         if (isValidMove($newX, $newY) && isCoordOpen([$newX, $newY])) {
-            $options[$key] = countOptionsAhead($newX, $newY);
+            $options[$key] = distanceToCenter($newX, $newY);
         }
     }
 
@@ -79,11 +91,19 @@ function findRoute($startX, $startY)
         $newX = $startX + $movements[$key][0];
         $newY = $startY + $movements[$key][1];
         
-        findRoute($newX, $newY);
+        if (isValidMove($newX, $newY) && isCoordOpen([$newX, $newY])) {
+            $result = findRoute($newX, $newY);
+
+            if ($result) {
+                return true;
+            }
+        }
     }
 
     // remove last element as this route reached a dead end
     array_pop($board);
+
+    return false;
 }
 
 
@@ -117,4 +137,15 @@ function countOptionsAhead($x, $y)
     }
 
     return $count;
+}
+
+function distanceToCenter($x, $y)
+{
+    global $squaresToCenter;
+
+    // distance to center
+    $distanceX = abs($squaresToCenter - $x);
+    $distanceY = abs($squaresToCenter - $y);
+
+    return sqrt(pow($distanceX, 2) + pow($distanceY, 2));
 }
